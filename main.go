@@ -76,6 +76,19 @@ func main() {
 	errorLabel := tui.NewLabel(" ")
 	angleLabel.SetStyleName("unit")
 
+	infoBox := tui.NewHBox(angleLabel)
+	infoBox.SetBorder(true)
+
+	errorBox := tui.NewHBox(errorLabel)
+	errorBox.SetBorder(true)
+
+	mainBox := tui.NewHBox(inputOuter, infoBox, errorBox)
+	mainBox.SetSizePolicy(tui.Expanding, tui.Maximum)
+
+	root := tui.NewVBox(stackBox, mainBox)
+	ui := tui.New(root)
+	ui.SetTheme(theme)
+
 	// inputBox.SetBorder(true)
 	inputBox.OnSubmit(func(e *tui.Entry) {
 		if "quit" == e.Text() {
@@ -108,19 +121,6 @@ func main() {
 		}
 		inputBox.SetText("")
 	})
-
-	infoBox := tui.NewHBox(angleLabel)
-	infoBox.SetBorder(true)
-
-	errorBox := tui.NewHBox(errorLabel)
-	errorBox.SetBorder(true)
-
-	mainBox := tui.NewHBox(inputOuter, infoBox, errorBox)
-	mainBox.SetSizePolicy(tui.Expanding, tui.Maximum)
-
-	root := tui.NewVBox(stackBox, mainBox)
-	ui := tui.New(root)
-	ui.SetTheme(theme)
 
 	ui.SetKeybinding("Esc", func() { ui.Quit() })
 	ui.SetKeybinding("Up", func() { inputBox.SetText(engine.lastinput) })

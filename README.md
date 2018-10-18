@@ -7,7 +7,9 @@ Simple yet efficient terminal RPN calcultator.
 Using Go 1.11:
 
 ```
-git clone github.com/leucos/gorpn
+export GO111MODULES=on
+git clone https://github.com/leucos/gorpn
+cd gorpn
 go install
 ```
 
@@ -36,3 +38,4 @@ DWTFYWPL
 @leucos
 
 Inspired by https://medium.com/@jhh3/anonymous-functions-and-reflection-in-go-71274dd9e83a
+
