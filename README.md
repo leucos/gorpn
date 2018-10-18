@@ -35,9 +35,15 @@ go install
   - `drop` removes last item in the stack
   - `pi`, `phi` constants
   - `quit` or `<ESC>` exists `gorpn`
+  - `<UP>` key recalls previous input
 
 Mode is shown in the bottom line. If an error occurs, a red `E` will
 show at the bottom right corner.
+
+## TODO
+
+- [  ] Stream input mode
+- [  ] undo
 
 ## Licence
 
