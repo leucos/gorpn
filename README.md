@@ -4,7 +4,7 @@
 
 Simple yet efficient terminal RPN calcultator.
 
-[![asciicast](https://asciinema.org/a/xOW7R5qK7daodn9ViHB2QNpmg.png)](https://asciinema.org/a/xOW7R5qK7daodn9ViHB2QNpmg)
+[![asciicast](https://asciinema.org/a/14.png)](https://asciinema.org/a/14)
 
 ## Installation
 
