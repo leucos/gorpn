@@ -1,5 +1,7 @@
 # Golang RPN calc
 
+[![CircleCI](https://circleci.com/gh/leucos/gorpn/tree/master.svg?style=svg)](https://circleci.com/gh/leucos/gorpn/tree/master)
+
 Simple yet efficient terminal RPN calcultator.
 
 [![asciicast](https://asciinema.org/a/xOW7R5qK7daodn9ViHB2QNpmg.png)](https://asciinema.org/a/xOW7R5qK7daodn9ViHB2QNpmg)
