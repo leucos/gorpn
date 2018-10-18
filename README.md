@@ -4,6 +4,12 @@ Simple yet efficient terminal RPN calcultator.
 
 ## Installation
 
+### Binary
+
+Grab a [release](https://github.com/leucos/gorpn/releases).
+
+### From sources
+
 Using Go 1.11:
 
 ```
