@@ -187,7 +187,11 @@ func NewRPMEngine() *RPMEngine {
 		"*":    func(x, y float64) float64 { return x * y },
 		"/":    func(x, y float64) float64 { return x / y },
 		"^":    func(x, y float64) float64 { return math.Pow(x, y) },
-		"%":    func(x, y float64) float64 { return math.Abs(math.Remainder(y, x)) },
+		"%":    func(x, y float64) float64 {
+      my, _ := math.Modf(y)
+      mx, _ := math.Modf(x)
+      return math.Mod(mx, my)
+    },
 		"pow":  func(x, y float64) float64 { return math.Pow(x, y) },
 		"sqrt": func(x float64) float64 { return math.Sqrt(x) },
 		// Trig
