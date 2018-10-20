@@ -182,16 +182,16 @@ func NewRPMEngine() *RPMEngine {
 	engine.mode = RAD
 	engine.haserror = false
 	engine.catalog = map[string]interface{}{
-		"+":    func(x, y float64) float64 { return x + y },
-		"-":    func(x, y float64) float64 { return x - y },
-		"*":    func(x, y float64) float64 { return x * y },
-		"/":    func(x, y float64) float64 { return x / y },
-		"^":    func(x, y float64) float64 { return math.Pow(x, y) },
-		"%":    func(x, y float64) float64 {
-      my, _ := math.Modf(y)
-      mx, _ := math.Modf(x)
-      return math.Mod(mx, my)
-    },
+		"+": func(x, y float64) float64 { return x + y },
+		"-": func(x, y float64) float64 { return x - y },
+		"*": func(x, y float64) float64 { return x * y },
+		"/": func(x, y float64) float64 { return x / y },
+		"^": func(x, y float64) float64 { return math.Pow(x, y) },
+		"%": func(x, y float64) float64 {
+			my, _ := math.Modf(y)
+			mx, _ := math.Modf(x)
+			return math.Mod(mx, my)
+		},
 		"pow":  func(x, y float64) float64 { return math.Pow(x, y) },
 		"sqrt": func(x float64) float64 { return math.Sqrt(x) },
 		// Trig
@@ -203,7 +203,7 @@ func NewRPMEngine() *RPMEngine {
 		"ceil":  func(x float64) float64 { return math.Ceil(x) },
 		"floor": func(x float64) float64 { return math.Floor(x) },
 		"round": func(x float64) float64 { return math.Round(x) },
-		"trunc": func(x, y float64) float64 { return math.Floor(x*math.Pow(10, y)) / math.Pow(10, y) },
+		"trunc": func(x, y float64) float64 { return math.Round(x*math.Pow(10, y)) / math.Pow(10, y) },
 		// Mode
 		"rad": func() { engine.mode = RAD },
 		"deg": func() { engine.mode = DEG },
