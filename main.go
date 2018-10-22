@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"reflect"
+	"regexp"
 	"strconv"
 
 	"github.com/marcusolsson/tui-go"
@@ -133,36 +134,26 @@ func main() {
 // Set allow dup to allow analyseInput to trigger a dup when "" is received
 // This is here so we can disable dups when calling recursively
 func analyseInput(engine *RPMEngine, input string, allowdup bool) error {
-	// TODO: check if input is digits followed by strings
-	// (for instance "12345+" or "12pow")
-	// so we could push + compute
-	// Also 12,13 should push 12 then push 13
-	// So the logic is:
-	// - separate numbers from non numbers into a list
-	// - remove all "," elements from the list
-	// iterate on this
-	// Also clever recursion is possible:
-	// if input is "" return
-	// if input starts with a number, grab biggest leading number and recurse on rest
-	// if input starts with a non number, grab biggest leading non number and recurse on rest
-	// but we have to tackle the edge case of "" since this is a valid input that means "dup"
-
-	if input == "" && !allowdup {
-		// If we do not allow dupes
-		// just return if input is empty
-		return nil
-	}
+	re := regexp.MustCompile("([0-9\\.]+)|([a-z]+)|([+-\\/\\*])")
+	tokens := re.FindAllString(input, -1)
 
 	// Saving input for "repeat" feature
-	engine.lastinput = input
-	number, err := strconv.ParseFloat(input, 64)
+	engine.lastinput = tokens[len(tokens)-1]
 
-	if err != nil {
-		// This is not a number
-		// Call Compute to the rescue
-		engine.Compute(input)
-	} else {
-		engine.Push(number)
+	for _, tok := range tokens {
+		// Skip any token separator (, or ' ')
+		if tok == " " || tok == "," {
+			continue
+		}
+		number, err := strconv.ParseFloat(tok, 64)
+
+		if err != nil {
+			// This is not a number
+			// Call Compute to the rescue
+			engine.Compute(tok)
+		} else {
+			engine.Push(number)
+		}
 	}
 
 	return nil
