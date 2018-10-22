@@ -43,8 +43,7 @@ show at the bottom right corner.
 
 ## TODO
 
-- [  ] Stream input mode
-- [  ] undo
+- [ ] undo
 
 ## Licence
 
