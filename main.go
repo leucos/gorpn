@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"math"
+	"net/http"
 	"reflect"
 	"regexp"
 	"strconv"
@@ -142,7 +144,7 @@ func main() {
 }
 
 func analyseInput(engine *RPMEngine, input string) error {
-	re := regexp.MustCompile("([0-9\\.]+)|([a-z]+)|([+-\\/\\*])")
+	re := regexp.MustCompile("([0-9\\.]+)|([a-z_]+)|([+-\\/\\*])")
 	tokens := re.FindAllString(input, -1)
 
 	// No tokens ? Just Dup !
@@ -222,6 +224,7 @@ func NewRPMEngine() *RPMEngine {
 		"round":     func(x float64) float64 { return math.Round(x) },
 		"trunc":     func(x, y float64) float64 { return math.Round(x*math.Pow(10, y)) / math.Pow(10, y) },
 		"precision": func(x float64) { engine.precision = int(x) },
+		"#":         func(x float64) { engine.precision = int(x) },
 		// Mode
 		"rad": func() { engine.mode = RAD },
 		"deg": func() { engine.mode = DEG },
@@ -282,10 +285,17 @@ func (e *RPMEngine) Pop() float64 {
 // Compute an operation
 // If the operation results in a value, push it onto the stack
 func (e *RPMEngine) Compute(operation string) error {
+
 	opFunc, ok := e.catalog[operation]
+
 	if !ok {
-		e.haserror = true
-		return fmt.Errorf("Operation %s not found", operation)
+		match, _ := regexp.MatchString("[a-z]{3}_[a-z]{3}", operation)
+
+		if !match {
+			e.haserror = true
+			return fmt.Errorf("Operation %s not found", operation)
+		}
+		return e.ExchangeRate(operation)
 	}
 
 	method := reflect.ValueOf(opFunc)
@@ -303,12 +313,41 @@ func (e *RPMEngine) Compute(operation string) error {
 	results := method.Call(operands)
 	if len(results) == 1 {
 		result := results[0].Float()
-		p := float64(e.precision)
-		if p != -1 {
-			result = math.Round(result*math.Pow(10, p)) / math.Pow(10, p)
-		}
+		// p := float64(e.precision)
+		// if p != -1 {
+		// 	result = math.Round(result*math.Pow(10, p)) / math.Pow(10, p)
+		// }
 		e.Push(result)
 	}
+
+	return nil
+}
+
+//ExchangeRate returns exchange rate for currencies specified
+// as src_dst
+func (e *RPMEngine) ExchangeRate(currencies string) error {
+	resp, err := http.Get("http://free.currencyconverterapi.com/api/v5/convert?q=" + currencies + "&compact=y")
+
+	if err != nil {
+		e.haserror = true
+		return fmt.Errorf("Currencies conversion unavailable")
+	}
+
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+
+	// Extract floats from string
+	re := regexp.MustCompile("([0-9\\.]+)")
+	tokens := re.FindAllString(string(body), -1)
+
+	// No tokens ?
+	if len(tokens) == 0 {
+		e.haserror = true
+		return nil
+	}
+
+	res, _ := strconv.ParseFloat(tokens[0], 64)
+	e.Push(res)
 
 	return nil
 }
