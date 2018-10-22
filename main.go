@@ -16,12 +16,13 @@ type stack []float64
 
 // RPMEngine is the engine for a RPN calculator
 type RPMEngine struct {
-	stack     stack
-	catalog   map[string]interface{}
-	mode      string
-	haserror  bool
-	lastinput string
-	precision int
+	stack        stack
+	catalog      map[string]interface{}
+	mode         string
+	haserror     bool
+	precision    int
+	history      []string
+	historyindex int
 }
 
 // Unit constants
@@ -103,12 +104,13 @@ func main() {
 		if "quit" == e.Text() {
 			ui.Quit()
 		}
+
 		analyseInput(engine, e.Text())
 
 		// Repaint angle units
 		angleLabel.SetText(engine.mode)
 
-		// Repaint precision if needed
+		// Repaint precision box if needed
 		if engine.precision != -1 {
 			precisionLabel.SetText(strconv.Itoa(engine.precision))
 		}
@@ -121,11 +123,12 @@ func main() {
 			engine.haserror = false
 		}
 
-		// empty widget
+		// Empty widget...
 		for i := stack.Length() - 1; i >= 0; i-- {
 			stack.Remove(i)
 		}
 
+		// ...and repaint
 		for _, val := range engine.stack {
 			stack.Append(tui.NewHBox(
 				tui.NewLabel(strconv.FormatFloat(val, 'f', -1, 64)),
@@ -136,7 +139,24 @@ func main() {
 	})
 
 	ui.SetKeybinding("Esc", func() { ui.Quit() })
-	ui.SetKeybinding("Up", func() { inputBox.SetText(engine.lastinput) })
+	ui.SetKeybinding("Up", func() {
+		if len(engine.history) == 0 {
+			return
+		}
+		inputBox.SetText(engine.history[engine.historyindex])
+		if engine.historyindex--; engine.historyindex < 0 {
+			engine.historyindex = 0
+		}
+	})
+	ui.SetKeybinding("Down", func() {
+		if len(engine.history) == 0 {
+			return
+		}
+		if engine.historyindex++; engine.historyindex > (len(engine.history) - 1) {
+			engine.historyindex = len(engine.history) - 1
+		}
+		inputBox.SetText(engine.history[engine.historyindex])
+	})
 
 	if err := ui.Run(); err != nil {
 		panic(err)
@@ -144,7 +164,7 @@ func main() {
 }
 
 func analyseInput(engine *RPMEngine, input string) error {
-	re := regexp.MustCompile("([0-9\\.]+)|([a-z_]+)|([+-\\/\\*])")
+	re := regexp.MustCompile("([0-9\\.]+)|([a-z_#]+)|([+-\\/\\*])")
 	tokens := re.FindAllString(input, -1)
 
 	// No tokens ? Just Dup !
@@ -153,14 +173,17 @@ func analyseInput(engine *RPMEngine, input string) error {
 		return nil
 	}
 
-	// Saving input for "repeat" feature
-	engine.lastinput = tokens[len(tokens)-1]
-
 	for _, tok := range tokens {
 		// Skip any token separator (, or ' ')
 		if tok == " " || tok == "," {
 			continue
 		}
+
+		// Saving input for "repeat" feature
+		// we can not do append(engine.history, tokens...) since
+		// we would get unfiltered " " or "," entries
+		engine.history = append(engine.history, tok)
+
 		number, err := strconv.ParseFloat(tok, 64)
 
 		if err != nil {
@@ -172,6 +195,7 @@ func analyseInput(engine *RPMEngine, input string) error {
 		}
 	}
 
+	engine.historyindex = len(engine.history) - 1
 	return nil
 }
 
