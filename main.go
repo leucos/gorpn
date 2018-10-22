@@ -19,6 +19,7 @@ type RPMEngine struct {
 	mode      string
 	haserror  bool
 	lastinput string
+	precision int
 }
 
 // Unit constants
@@ -75,15 +76,20 @@ func main() {
 
 	angleLabel := tui.NewLabel("RAD")
 	errorLabel := tui.NewLabel(" ")
+	precisionLabel := tui.NewLabel(" ")
 	angleLabel.SetStyleName("unit")
+	precisionLabel.SetStyleName("unit")
 
 	infoBox := tui.NewHBox(angleLabel)
 	infoBox.SetBorder(true)
 
+	precisionBox := tui.NewHBox(precisionLabel)
+	precisionBox.SetBorder(true)
+
 	errorBox := tui.NewHBox(errorLabel)
 	errorBox.SetBorder(true)
 
-	mainBox := tui.NewHBox(inputOuter, infoBox, errorBox)
+	mainBox := tui.NewHBox(inputOuter, infoBox, precisionBox, errorBox)
 	mainBox.SetSizePolicy(tui.Expanding, tui.Maximum)
 
 	root := tui.NewVBox(stackBox, mainBox)
@@ -95,12 +101,16 @@ func main() {
 		if "quit" == e.Text() {
 			ui.Quit()
 		}
-		analyseInput(engine, e.Text(), true)
+		analyseInput(engine, e.Text())
 
 		// Repaint angle units
 		angleLabel.SetText(engine.mode)
 
-		// Repaint erro cell
+		// Repaint precision if needed
+		if engine.precision != -1 {
+			precisionLabel.SetText(strconv.Itoa(engine.precision))
+		}
+		// Repaint error cell
 		errorLabel.SetText(" ")
 		if engine.haserror {
 			errorLabel.SetText("E")
@@ -131,11 +141,15 @@ func main() {
 	}
 }
 
-// Set allow dup to allow analyseInput to trigger a dup when "" is received
-// This is here so we can disable dups when calling recursively
-func analyseInput(engine *RPMEngine, input string, allowdup bool) error {
+func analyseInput(engine *RPMEngine, input string) error {
 	re := regexp.MustCompile("([0-9\\.]+)|([a-z]+)|([+-\\/\\*])")
 	tokens := re.FindAllString(input, -1)
+
+	// No tokens ? Just Dup !
+	if len(tokens) == 0 {
+		engine.Compute("dup")
+		return nil
+	}
 
 	// Saving input for "repeat" feature
 	engine.lastinput = tokens[len(tokens)-1]
@@ -172,6 +186,7 @@ func NewRPMEngine() *RPMEngine {
 	engine := &RPMEngine{}
 	engine.mode = RAD
 	engine.haserror = false
+	engine.precision = -1
 	engine.catalog = map[string]interface{}{
 		"+": func(x, y float64) float64 { return x + y },
 		"-": func(x, y float64) float64 { return x - y },
@@ -190,17 +205,21 @@ func NewRPMEngine() *RPMEngine {
 		"cos": func(x float64) float64 { return math.Cos(convertAngle(*engine, x)) },
 		"tan": func(x float64) float64 { return math.Tan(convertAngle(*engine, x)) },
 		// Precision functions
-		"abs":   func(x float64) float64 { return math.Abs(x) },
-		"ceil":  func(x float64) float64 { return math.Ceil(x) },
-		"floor": func(x float64) float64 { return math.Floor(x) },
-		"round": func(x float64) float64 { return math.Round(x) },
-		"trunc": func(x, y float64) float64 { return math.Round(x*math.Pow(10, y)) / math.Pow(10, y) },
+		"abs":       func(x float64) float64 { return math.Abs(x) },
+		"ceil":      func(x float64) float64 { return math.Ceil(x) },
+		"floor":     func(x float64) float64 { return math.Floor(x) },
+		"round":     func(x float64) float64 { return math.Round(x) },
+		"trunc":     func(x, y float64) float64 { return math.Round(x*math.Pow(10, y)) / math.Pow(10, y) },
+		"precision": func(x float64) { engine.precision = int(x) },
 		// Mode
 		"rad": func() { engine.mode = RAD },
 		"deg": func() { engine.mode = DEG },
 		// Stack ops
-		"":    func() { engine.stack = engine.stack.Dup() },
-		"dup": func() { engine.stack = engine.stack.Dup() },
+		"dup": func() {
+			n := engine.Pop()
+			engine.PushNaked(n)
+			engine.Push(n)
+		},
 		"drop": func() {
 			if len(engine.stack) > 0 {
 				_ = engine.Pop()
@@ -225,8 +244,18 @@ func NewRPMEngine() *RPMEngine {
 	return engine
 }
 
+// PushNaked pushes a value to the internal stack without handling precision
+func (e *RPMEngine) PushNaked(v float64) {
+	e.stack = e.stack.Push(v)
+}
+
 // Push a value to the internal stack
 func (e *RPMEngine) Push(v float64) {
+	p := float64(e.precision)
+	if p != -1 {
+		v = math.Round(v*math.Pow(10, p)) / math.Pow(10, p)
+	}
+
 	e.stack = e.stack.Push(v)
 }
 
@@ -263,7 +292,11 @@ func (e *RPMEngine) Compute(operation string) error {
 	results := method.Call(operands)
 	if len(results) == 1 {
 		result := results[0].Float()
-		e.Push(float64(result))
+		p := float64(e.precision)
+		if p != -1 {
+			result = math.Round(result*math.Pow(10, p)) / math.Pow(10, p)
+		}
+		e.Push(result)
 	}
 
 	return nil
