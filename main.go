@@ -173,9 +173,17 @@ func analyseInput(engine *RPMEngine, input string) error {
 	return nil
 }
 
-func convertAngle(engine RPMEngine, x float64) float64 {
+func convertRad2Deg(engine RPMEngine, x float64) float64 {
 	if engine.mode == DEG {
-		return x * 2 * math.Pi / 360
+		return x * 180 / math.Pi
+	}
+
+	return x
+}
+
+func convertDeg2Rad(engine RPMEngine, x float64) float64 {
+	if engine.mode == DEG {
+		return x * math.Pi / 180
 	}
 
 	return x
@@ -201,9 +209,12 @@ func NewRPMEngine() *RPMEngine {
 		"pow":  func(x, y float64) float64 { return math.Pow(x, y) },
 		"sqrt": func(x float64) float64 { return math.Sqrt(x) },
 		// Trig
-		"sin": func(x float64) float64 { return math.Sin(convertAngle(*engine, x)) },
-		"cos": func(x float64) float64 { return math.Cos(convertAngle(*engine, x)) },
-		"tan": func(x float64) float64 { return math.Tan(convertAngle(*engine, x)) },
+		"sin":  func(x float64) float64 { return math.Sin(convertDeg2Rad(*engine, x)) },
+		"cos":  func(x float64) float64 { return math.Cos(convertDeg2Rad(*engine, x)) },
+		"tan":  func(x float64) float64 { return math.Tan(convertDeg2Rad(*engine, x)) },
+		"asin": func(x float64) float64 { return convertRad2Deg(*engine, math.Asin(x)) },
+		"acos": func(x float64) float64 { return convertRad2Deg(*engine, math.Acos(x)) },
+		"atan": func(x float64) float64 { return convertRad2Deg(*engine, math.Atan(x)) },
 		// Precision functions
 		"abs":       func(x float64) float64 { return math.Abs(x) },
 		"ceil":      func(x float64) float64 { return math.Ceil(x) },

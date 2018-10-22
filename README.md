@@ -27,13 +27,14 @@ go install
 
   - `+`, `-`, `*`, `/`, `%`
   - `pow` (e.g. `2⏎3⏎pow` yields `8`), `sqrt`
-  - `sin`, `cos`, `tan`
+  - `sin`, `cos`, `tan`, `asin`, `acos`, `atan`, 
   - `abs`, `ceil`, `floor`, `round`, `trunc` (e.g. `3.14159⏎2⏎trunc⏎`)
   - `rad`, `deg` for angle modes
   - `dup` (a.k.a empty input and ⏎) duplicates last stack item
   - `swap` exchanges last 2 items in the stack
   - `drop` removes last item in the stack
   - `pi`, `phi` constants
+  - `precision` (e.g. `2⏎precision`) limits number of displayed digits
   - `quit` or `<ESC>` exists `gorpn`
   - `<UP>` key recalls previous input
 
