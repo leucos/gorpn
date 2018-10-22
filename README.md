@@ -37,7 +37,7 @@ go install
   - `precision`, `#` (e.g. `2⏎precision⏎` or ``2⏎#⏎`) limits number of displayed digits
   - `cu1_cu2` returns exchange rate between `cu1` and `cu2` (e.g. `isk_eur` for xchange rate between ISK and EUR)
   - `quit` or `<ESC>` exists `gorpn`
-  - `<UP>` key recalls previous input
+  - `<UP>/<DOWN>` key walks input history up or down
 
 Mode is shown in the bottom line. If an error occurs, a red `E` will
 show at the bottom right corner.
