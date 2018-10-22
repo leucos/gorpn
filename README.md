@@ -45,6 +45,9 @@ show at the bottom right corner.
 ## TODO
 
 - [ ] undo
+- [ ] non-intercative mode support (stdin / stdout)
+- [ ] sentence recall (vs token recall) with PgUp/PgDown
+- [ ] stack save on exit / load on start
 
 ## Licence
 
@@ -55,4 +58,3 @@ DWTFYWPL
 @leucos
 
 Inspired by https://medium.com/@jhh3/anonymous-functions-and-reflection-in-go-71274dd9e83a
-
