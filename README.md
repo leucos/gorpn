@@ -26,7 +26,7 @@ go install
 ## Supported ops
 
   - `+`, `-`, `*`, `/`, `%`
-  - `pow` (e.g. `2⏎3⏎pow` yields `8`), `sqrt`
+  - `pow`, `^` (e.g. `2⏎3⏎pow⏎` yields `8`), `sqrt`
   - `sin`, `cos`, `tan`, `asin`, `acos`, `atan`, 
   - `abs`, `ceil`, `floor`, `round`, `trunc` (e.g. `3.14159⏎2⏎trunc⏎`)
   - `rad`, `deg` for angle modes
@@ -48,6 +48,7 @@ show at the bottom right corner.
 - [ ] non-intercative mode support (stdin / stdout)
 - [ ] sentence recall (vs token recall) with PgUp/PgDown
 - [ ] stack save on exit / load on start
+- [ ] completion
 
 ## Licence
 

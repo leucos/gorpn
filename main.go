@@ -253,11 +253,7 @@ func NewRPMEngine() *RPMEngine {
 		"rad": func() { engine.mode = RAD },
 		"deg": func() { engine.mode = DEG },
 		// Stack ops
-		"dup": func() {
-			n := engine.Pop()
-			engine.PushNaked(n)
-			engine.Push(n)
-		},
+		"dup": func() { engine.Dup() },
 		"drop": func() {
 			if len(engine.stack) > 0 {
 				_ = engine.Pop()
@@ -285,6 +281,15 @@ func NewRPMEngine() *RPMEngine {
 // PushNaked pushes a value to the internal stack without handling precision
 func (e *RPMEngine) PushNaked(v float64) {
 	e.stack = e.stack.Push(v)
+}
+
+// Dup duplicates last value on stack
+func (e *RPMEngine) Dup() {
+	if e.stack.Len() > 0 {
+		n := e.Pop()
+		e.PushNaked(n)
+		e.Push(n)
+	}
 }
 
 // Push a value to the internal stack
