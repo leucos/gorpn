@@ -53,6 +53,14 @@ func (s stack) Clear() stack {
 	return []float64{}
 }
 
+func (s stack) Sum() (stack, float64) {
+	var sum float64
+	for _, v := range s {
+		sum += v
+	}
+	return s, sum
+}
+
 func main() {
 	engine := NewRPMEngine()
 
@@ -232,6 +240,7 @@ func NewRPMEngine() *RPMEngine {
 			mx, _ := math.Modf(x)
 			return math.Mod(mx, my)
 		},
+		"sum":  func() float64 { return engine.Sum() },
 		"pow":  func(x, y float64) float64 { return math.Pow(x, y) },
 		"sqrt": func(x float64) float64 { return math.Sqrt(x) },
 		// Trig
@@ -307,6 +316,16 @@ func (e *RPMEngine) Pop() float64 {
 	var v float64
 
 	e.stack, v = e.stack.Pop()
+
+	return v
+}
+
+// Sum all the values from the stack
+func (e *RPMEngine) Sum() float64 {
+	var v float64
+
+	e.stack, v = e.stack.Sum()
+	e.stack = e.stack.Clear()
 
 	return v
 }
