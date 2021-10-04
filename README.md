@@ -1,5 +1,9 @@
 # Golang RPN calc
 
+**DEPRECATED** 
+
+See https://github.com/leucos/grpn instead.
+
 [![CircleCI](https://circleci.com/gh/leucos/gorpn/tree/master.svg?style=svg)](https://circleci.com/gh/leucos/gorpn/tree/master)
 
 Simple yet efficient terminal RPN calcultator.
